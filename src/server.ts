@@ -35,8 +35,7 @@ const { verify, settle } = useFacilitator(facilitator1)
 // base-speolia
 const USDCContract = '0x036CbD53842c5426634e7929541eC2318f3dCF7e'
 
-
-const SETTLEContract = '0x0a37f586fe0984b5c35b764d81fc8a1cf23a33d8'
+const SETTLEContract = '0x833589fcd6edb6e08f4c7c32d4f71b54bda02913'
 
 const eventContract = '0x18A976ee42A89025f0d3c7Fb8B32e0f8B840E1F3'
 
@@ -54,14 +53,12 @@ const Settle_ContractPool = masterSetup.settle_contractAdmin.map((n: string) => 
 	}
 })
 
-
-
 const x402Version = 1
 
 function createExactPaymentRequirements(
 	price: Price,
 	resource: Resource,
-	description = "",
+	description: string,
 ): PaymentRequirements {
 	const atomicAmountForAsset = processPriceToAtomicAmount(price, 'base-sepolia')
 	if ("error" in atomicAmountForAsset) {
@@ -75,15 +72,16 @@ function createExactPaymentRequirements(
 		maxAmountRequired,
 		resource,
 		description,
-		mimeType: "",
+		mimeType: "application/json",
 		payTo: SETTLEContract,
-		maxTimeoutSeconds: 60,
+		maxTimeoutSeconds: 10,
 		asset: asset.address,
 		outputSchema: undefined,
 		extra: {
-			name: 'USD Coin',
+			name: 'USDC',
 			version: '2',
 		},
+		// extra: { "gasLimit": "1000000" }
 	};
 }
 
@@ -166,19 +164,17 @@ const checkSig = (ercObj: any): {
 
 		// —— fallback：手工 hash + recoverAddress ——
 
-		// 1) 规范化签名并拆分 v/r/s
+		// 1)  v/r/s
 		let hex = sigRaw.startsWith('0x') ? sigRaw : ('0x' + sigRaw)
 		if (hex.length !== 132) {
 			console.log(`⚠️ Unusual signature length=${hex.length}, still attempting recovery`)
-			// 尽力而为，不直接退出
 		}
 		const r = '0x' + hex.slice(2, 66)
 		const s = '0x' + hex.slice(66, 130)
-		let v = parseInt(hex.slice(130, 132) || '1b', 16) // 默认 0x1b(27)
+		let v = parseInt(hex.slice(130, 132) || '1b', 16)
 		if (v === 0 || v === 1) v += 27
 		if (v !== 27 && v !== 28) console.log(`⚠️ Unusual v=${v} after normalization`)
 
-		// 2) 规范化 message（数值字段使用 BigInt，更符合 v6 编码）
 		const msgForHash: any = {
 			from: message.from,
 			to: message.to,
@@ -188,7 +184,6 @@ const checkSig = (ercObj: any): {
 			nonce: message.nonce
 		}
 
-		// 3) 计算 digest
 		let digest: string
 		try {
 			digest = ethers.TypedDataEncoder.hash(domain as any, typesObj as any, msgForHash)
@@ -198,7 +193,7 @@ const checkSig = (ercObj: any): {
 			return null
 		}
 
-		// 4) 恢复地址
+		// 4) recover address
 		let recoveredAddress: string
 		try {
 			recoveredAddress = ethers.recoverAddress(digest, { v, r, s })
@@ -219,9 +214,6 @@ const checkSig = (ercObj: any): {
 		return null
 	}
 }
-
-
-
 
 const initialize = async (reactBuildFolder: string, PORT: number, setupRoutes: (router: any) => void) => {
 	console.log('🔧 Initialize called with PORT:', PORT, 'reactBuildFolder:', reactBuildFolder)
@@ -261,8 +253,6 @@ const initialize = async (reactBuildFolder: string, PORT: number, setupRoutes: (
 			next();
 		});
 	}
-
-
 	// app.use ( express.static ( staticFolder ))
 	app.use(express.json())
 
@@ -273,9 +263,7 @@ const initialize = async (reactBuildFolder: string, PORT: number, setupRoutes: (
 
 	const cors = require('cors')
 
-
 	if (!isProd) {
-		// 本地开发才由 Node 处理 CORS（例如直连 http://localhost:4088）
 		app.use(/.*/, cors({
 			origin: ['http://localhost:4088'],
 			methods: ['GET', 'POST', 'OPTIONS'],
@@ -292,163 +280,6 @@ const initialize = async (reactBuildFolder: string, PORT: number, setupRoutes: (
 			maxAge: 600,
 		}));
 	}
-
-
-
-
-	// app.use(paymentMiddleware(
-	// 	owner, 
-	// 	{
-	// 		"GET /api/weather": {
-	// 			price: "$0.001",
-	// 			network: "base",
-	// 			config: {
-	// 				discoverable: true,
-	// 				description: "SETTLE: MINTS THAT SETTLE_ON BASE",
-	// 				inputSchema: {
-	// 					queryParams: {
-
-	// 					}
-	// 				},
-	// 				outputSchema: {
-	// 					type: "object",
-	// 					properties: { 
-	// 						temperature: { type: "number" },
-	// 						conditions: { type: "string" },
-	// 						humidity: { type: "number" }
-	// 					}
-	// 				}
-	// 			}
-	// 		},
-	// 		"GET /api/settle0001": {
-	// 			price: "$0.001",
-	// 			network: "base",
-	// 			config: {
-	// 				discoverable: true,
-	// 				description: "SETTLE: MINTS THAT SETTLE_ON BASE",
-	// 				inputSchema: {
-	// 					queryParams: {
-
-	// 					}
-	// 				},
-	// 				outputSchema: {
-	// 					type: "object",
-	// 					properties: { 
-	// 						temperature: { type: "number" },
-	// 						conditions: { type: "string" },
-	// 						humidity: { type: "number" }
-	// 					}
-	// 				}
-	// 			}
-	// 		},
-	// 		"GET /api/settle001": {
-	// 			price: "$0.01",
-	// 			network: "base",
-	// 			config: {
-	// 				discoverable: true,
-	// 				description: "SETTLE: MINTS THAT SETTLE_ON BASE",
-	// 				inputSchema: {
-	// 					queryParams: {
-
-	// 					}
-	// 				},
-	// 				outputSchema: {
-	// 					type: "object",
-	// 					properties: { 
-	// 						temperature: { type: "number" },
-	// 						conditions: { type: "string" },
-	// 						humidity: { type: "number" }
-	// 					}
-	// 				}
-	// 			}
-	// 		},
-	// 		"GET /api/settle01": {
-	// 			price: "$0.1",
-	// 			network: "base",
-	// 			config: {
-	// 				discoverable: true,
-	// 				description: "SETTLE: MINTS THAT SETTLE_ON BASE",
-	// 				inputSchema: {
-	// 					queryParams: {
-
-	// 					}
-	// 				},
-	// 				outputSchema: {
-	// 					type: "object",
-	// 					properties: { 
-	// 						temperature: { type: "number" },
-	// 						conditions: { type: "string" },
-	// 						humidity: { type: "number" }
-	// 					}
-	// 				}
-	// 			}
-	// 		},
-	// 		"GET /api/settle1": {
-	// 			price: "$1.00",
-	// 			network: "base",
-	// 			config: {
-	// 				discoverable: true,
-	// 				description: "SETTLE: MINTS THAT SETTLE_ON BASE",
-	// 				inputSchema: {
-	// 					queryParams: {
-
-	// 					}
-	// 				},
-	// 				outputSchema: {
-	// 					type: "object",
-	// 					properties: { 
-	// 						temperature: { type: "number" },
-	// 						conditions: { type: "string" },
-	// 						humidity: { type: "number" }
-	// 					}
-	// 				}
-	// 			}
-	// 		},
-	// 		"GET /api/settle10": {
-	// 			price: "$10.00",
-	// 			network: "base",
-	// 			config: {
-	// 				discoverable: true,
-	// 				description: "SETTLE: MINTS THAT SETTLE_ON BASE",
-	// 				inputSchema: {
-	// 					queryParams: {
-
-	// 					}
-	// 				},
-	// 				outputSchema: {
-	// 					type: "object",
-	// 					properties: { 
-	// 						temperature: { type: "number" },
-	// 						conditions: { type: "string" },
-	// 						humidity: { type: "number" }
-	// 					}
-	// 				}
-	// 			}
-	// 		},
-	// 		"GET /api/settle100": {
-	// 			price: "$100.00",
-	// 			network: "base",
-	// 			config: {
-	// 				discoverable: true,
-	// 				description: "SETTLE: MINTS THAT SETTLE_ON BASE",
-	// 				inputSchema: {
-	// 					queryParams: {
-
-	// 					}
-	// 				},
-	// 				outputSchema: {
-	// 					type: "object",
-	// 					properties: { 
-	// 						temperature: { type: "number" },
-	// 						conditions: { type: "string" },
-	// 						humidity: { type: "number" }
-	// 					}
-	// 				}
-	// 			}
-	// 		}
-	// 	},
-	// 	facilitator1
-	// ))
 
 	const router = express.Router()
 
@@ -476,7 +307,6 @@ const initialize = async (reactBuildFolder: string, PORT: number, setupRoutes: (
 		return res.status(404).end()
 	})
 
-	console.log('🚀 Starting express.listen on port:', PORT)
 	const server = app.listen(PORT, () => {
 		console.log('✅ Server started successfully!')
 		console.table([
@@ -579,9 +409,6 @@ const processPaymebnt = async (req: any, res: any, price: string) => {
 	const SETTLE_tokenvalue = USDC_tokenValue * MINT_RATE
 	const SETTLE_token_ether = ethers.formatEther(SETTLE_tokenvalue)
 
-	logger(`processPaymebnt ${_routerName} price=${price} `)
-
-
 	const paymentRequirements = [createExactPaymentRequirements(
 		price,
 		resource,
@@ -594,7 +421,7 @@ const processPaymebnt = async (req: any, res: any, price: string) => {
 		return
 	}
 
-	let responseData: x402SettleResponse
+	let x402SettleResponse: x402SettleResponse
 
 	const paymentHeader = exact.evm.decodePayment(req.header("X-PAYMENT")!)
 	const saleRequirements = paymentRequirements[0]
@@ -606,10 +433,6 @@ const processPaymebnt = async (req: any, res: any, price: string) => {
 	}
 
 	try {
-		//if settle error
-
-		console.log("paymentHeader", paymentHeader)
-		console.log("saleRequirements", saleRequirements)
 		const settleResponse = await settle(
 			paymentHeader,
 			saleRequirements
@@ -620,14 +443,13 @@ const processPaymebnt = async (req: any, res: any, price: string) => {
 		// In a real application, you would store this response header
 		// and associate it with the payment for later verification
 
-		responseData = JSON.parse(Buffer.from(responseHeader, 'base64').toString())
+		x402SettleResponse = JSON.parse(Buffer.from(responseHeader, 'base64').toString())
 
-		if (!responseData.success) {
-			logger(`${_routerName} responseData ERROR!`, inspect(responseData, false, 3, true))
+		if (!x402SettleResponse.success) {
+			logger(`${_routerName} responseData ERROR!`, inspect(x402SettleResponse, false, 3, true))
 			return res.status(402).end()
 		}
-
-
+		res.setHeader('X-PAYMENT-RESPONSE', responseHeader)
 	} catch (error) {
 		console.error("Payment settlement failed:", error);
 
@@ -652,40 +474,30 @@ const processPaymebnt = async (req: any, res: any, price: string) => {
 
 		return res.status(402).end()
 	}
-
-
-	const wallet = responseData.payer
+	const wallet = x402SettleResponse.payer
 
 	const isWallet = ethers.isAddress(wallet)
-
 
 	const ret: x402Response = {
 		success: true,
 		payer: wallet,
-		USDC_tx: responseData?.transaction,
-		network: responseData?.network,
+		USDC_tx: x402SettleResponse?.transaction,
+		network: x402SettleResponse?.network,
 		timestamp: new Date().toISOString()
 	}
 
-
 	if (isWallet) {
-
-
 		x402ProcessPool.push({
 			wallet,
 			settle: ethers.parseUnits('0.001', 6).toString()
 		})
 
-		logger(`${_routerName} success!`, inspect(responseData, false, 3, true))
+		logger(`${_routerName} success!`, inspect(x402SettleResponse, false, 3, true))
 		process_x402()
-
-
 	}
-
 
 	res.status(200).json(ret).end()
 }
-
 
 const facilitatorsPool: facilitatorsPoolType[] = []
 
@@ -740,12 +552,17 @@ const facilitators = async () => {
 
 
 const router = (router: express.Router) => {
-
-
 	router.get('/weather', async (req, res) => {
-		return processPaymebnt(req, res, '0.001')
+		processPaymebnt(req, res, '0.001')
+		//demo resource
+		const weatherData = {
+			temperature: 25,
+			condition: '晴天',
+			city: 'HangZhou',
+			paid: true,
+		}
+		return res.status(200).json({ success: true, data: weatherData });
 	})
-
 
 	router.get('/settleHistory', async (req, res) => {
 		res.status(200).json(ReflashData.slice(0, 20)).end()
@@ -779,77 +596,8 @@ const router = (router: express.Router) => {
 		return processPaymebnt(req, res, '100.00')
 
 	})
-
-
-	// router.post('/mintTestnet', async (req, res) => {
-	// 	// logger(Colors.red(`/mintTestnet coming in`), inspect(req.body, false, 3, true))
-
-	// 	// const ercObj: body402 = req.body
-
-
-	// 	// if (!ercObj?.sig || !ercObj?.EIP712 || !ercObj.EIP712?.domain||!ercObj.EIP712?.message) {
-
-	// 	// 	logger(Colors.red(`message or domain Data format error 1!:`), inspect(ercObj, false, 3, true))
-	// 	// 	return res.status(200).json({error: `Data format error!`}).end()
-	// 	// }
-
-	// 	// const message = ercObj.EIP712.message
-	// 	// const domain = ercObj.EIP712.domain
-
-	// 	// if (!message || !message?.value || domain?.verifyingContract?.toLowerCase() !== USDCContract.toLowerCase()) {
-	// 	// 	logger(Colors.red(`message or domain Data format error 2 !: domain?.verifyingContract ${domain?.verifyingContract} USDC = ${USDCContract}`))
-	// 	// 	return res.status(200).json({error: `message or domain Data format error!`}).end()
-	// 	// }
-
-	// 	// // 检查收款人必须是 ownerWallet
-	// 	// if (!message?.to || message.to.toLowerCase() !== SETTLEContract.toLowerCase()) {
-	// 	// 	logger(Colors.red(`Recipient check failed! Expected: ${SETTLEContract}, Got: ${message?.to}`))
-	// 	// 	return res.status(200).json({error: `Recipient must be ${SETTLEContract}!`}).end()
-	// 	// }
-
-	// 	// // 调用 checkSig 验证签名
-	// 	// const sigResult = checkSig(ercObj)
-	// 	// if (!sigResult || !sigResult.isValid) {
-	// 	// 	logger(Colors.red(`Signature verification failed:`), inspect(sigResult, false, 3, true))
-	// 	// 	return res.status(200).json({error: `Signature verification failed!`}).end()
-	// 	// }
-
-	// 	// const value = parseFloat(message.value)
-	// 	// if (value < 0.01) {
-	// 	// 	logger(Colors.red(`value failed: ${value}`))
-	// 	// 	return res.status(200).json({error: `value low error!`}).end()
-	// 	// }
-
-	// 	// x402ProcessPool.push({
-	// 	// 	v: sigResult.v,
-	// 	// 	r: sigResult.r,
-	// 	// 	s: sigResult.s,
-	// 	// 	address: sigResult.recoveredAddress,
-	// 	// 	usdcAmount: message.value,
-	// 	// 	validAfter: message.validAfter,
-	// 	// 	validBefore: message.validBefore,
-	// 	// 	nonce: message.nonce
-	// 	// })
-
-	// 	// process_x402()
-	// 	// // 返回签名验证结果
-
-	// 	// res.status(200).json({
-	// 	// 	success: true,
-	// 	// 	message: 'Signature verified successfully',
-	// 	// 	signatureComponents: {
-	// 	// 		v: sigResult.v,
-	// 	// 		r: sigResult.r,
-	// 	// 		s: sigResult.s,
-	// 	// 		recoveredAddress: sigResult.recoveredAddress
-	// 	// 	}
-	// 	// }).end()
-	// })
 }
-
-
 const x402ProcessPool: airDrop[] = []
-
 
 const MINT_RATE = ethers.parseUnits('7000', 18)
 const USDC_decimals = BigInt(10 ** 6)
@@ -865,7 +613,7 @@ let fileCache: ReflashData[] = []
 
 // 定时器句柄
 let settleFlushTimer: NodeJS.Timeout | null = null;
-let flushing = false; // 防重入
+let flushing = false;
 
 
 
@@ -886,22 +634,17 @@ async function flushNewReflashData(): Promise<void> {
 
 		if (newOnes.length === 0) return;
 
-		// 读一遍最新文件（防止多进程/意外修改导致覆盖）
 		await loadSettleFile();
 
-		// 过滤掉已存在的（双重保险）
 		const reallyNew = newOnes.filter(r => !persistedHashes.has(r.hash));
 		if (reallyNew.length === 0) return;
 
-		// 统一保持倒序：新纪录插到最前
 		const nextFile = [...reallyNew, ...fileCache];
 
-		// 原子写入：先写临时文件，再 rename
 		const tmp = SETTLE_FILE + ".tmp";
 		await fs.writeFileSync(tmp, JSON.stringify(nextFile, null, 2), "utf8")
 		await fs.renameSync(tmp, SETTLE_FILE)
 
-		// 更新内存索引
 		fileCache = nextFile;
 		for (const r of reallyNew) persistedHashes.add(r.hash);
 	} catch (e: any) {
