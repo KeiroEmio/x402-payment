@@ -53,6 +53,8 @@ PAYER_PK=0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 
 The server reads `~/.master.json`. A minimal template:
 
+You can navigate to https://portal.cdp.coinbase.com/products/faucet in your browser to get some test USDC or ETH and navigate to https://portal.cdp.coinbase.com/projects/api-keys to create CDP_API_KEY_ID and CDP_API_KEY_SECRET.
+
 ```json
 {
   "settle_admin": "0x0000000000000000000000000000000000000000",
