@@ -30,7 +30,7 @@ yarn add @settle402/sdk
 
 ![Coinbase Facilitator Diagram](./facilitator-diagram.png)
 
-## Quick Start: Two-Terminal Setup (Server + Offline Signing)
+## Quick Start: Two-Terminal Setup (Server + Client (User Offline Signing))
 
 This guide shows how to:
 
@@ -62,8 +62,7 @@ You can navigate to https://portal.cdp.coinbase.com/products/faucet in your brow
     "CDP_API_KEY_ID": "your-key-id",
     "CDP_API_KEY_SECRET": "your-key-secret"
   },
-  "settle_contractAdmin": ["0x0000000000000000000000000000000000000000"],
-  "event_endpoint": "https://mainnet.base.org"
+  "settle_contractAdmin": ["0x0000000000000000000000000000000000000000"]
 }
 ```
 
