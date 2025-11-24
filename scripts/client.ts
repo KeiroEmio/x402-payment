@@ -23,6 +23,7 @@ async function signExactPayload() {
             }),
             signer,
         );
+        // call first req to return paymentRequired , and then sign it , send second req for endpointPath.
         const response = await api.get(endpointPath);
         console.log(response.data);
 

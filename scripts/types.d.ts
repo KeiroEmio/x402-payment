@@ -131,9 +131,23 @@ export type body402 = {
 }
 
 export type SignatureComponents = {
-	v: number
-	r: string
-	s: string
-	recoveredAddress: string
-	isValid: boolean
+    v: number
+    r: string
+    s: string
+    recoveredAddress: string
+    isValid: boolean
+}
+
+// 402 Payment Required 响应体（客户端 client.getApi().PaymentRequired）
+// 与服务器 verifyPayment 返回的 JSON 结构对齐：包含协议版本与可接受的支付方案。
+// 可选字段用于携带错误原因与建议付款者地址（例如验证阶段返回的 payer）。
+import type { PaymentRequirements } from "x402/types"
+export type PaymentRequired = {
+    x402Version: number
+    accepts: PaymentRequirements[]
+    error?: unknown
+    payer?: string
+    // 可选：便于追踪与容错的附加信息
+    requestId?: string
+    serverTime?: number // unix 秒级时间戳
 }
