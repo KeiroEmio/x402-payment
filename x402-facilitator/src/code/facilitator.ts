@@ -53,6 +53,7 @@ function useFacilitator(facilitator: Facilitator) {
 function createExactPaymentRequirements(create) {
 
     return {
+        scheme: 'exact',
         asset,
         network,
         x402Version,

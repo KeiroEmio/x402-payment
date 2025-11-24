@@ -1,5 +1,5 @@
 import { privateKeyToAccount } from 'viem/accounts';
-import { getChain } from './chains';
+import { getChainConfig } from './chains';
 import type { ISigner } from './types';
 import { Hex } from 'viem';
 import { EvmSigner, SvmSigner } from './types';
@@ -13,7 +13,7 @@ import { Keypair } from '@solana/web3.js';
  */
 
 export function createSigner(network: string, privateKey: Hex, options?: { rpcUrl?: string }): ISigner {
-    const chain = getChain(network);
+    const chain = getChainConfig(network);
     chain.rpcUrl = options?.rpcUrl || chain.rpcUrl;
     if (chain.isEvm) {
         const account = privateKeyToAccount(privateKey);

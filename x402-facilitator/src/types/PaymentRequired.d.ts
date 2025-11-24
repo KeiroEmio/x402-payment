@@ -7,19 +7,19 @@ export type Network =
     | "eth"
     | "eth-sepolia"
 
-export type HexString = `0x${string}`;
+export type Hex = `0x${string}`;
 
 export interface PaymentRequirement {
     scheme: Scheme;
     network: Network;
-    maxAmountRequired: string;
+    maxAmountRequired: bigint;
     resource: string;
     description: string;
     mimeType: string;
     outputSchema?: Record<string, any>;
     payTo: Address;
     maxTimeoutSeconds: number;
-    asset: string;
+    asset: Hex;
     extra?: Record<string, any>;
 }
 
