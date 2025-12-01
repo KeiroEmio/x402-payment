@@ -14,13 +14,7 @@ export interface SPLTokenAmount {
 
 export type Price = number | string | ERC20TokenAmount | SPLTokenAmount
 
-export type Network =
-    | 'rei'
-    | 'base-sepolia'
-    | 'polygon-amoy'
-    | 'ethereum'
-    | 'polygon'
-    | 'base'
+export type Network = "rei" | "base" | "baseSepolia";
 
 interface RouteConfig {
     price: Price
@@ -34,3 +28,5 @@ export interface RoutePattern {
     pattern: RegExp
     config: RouteConfig
 }
+
+

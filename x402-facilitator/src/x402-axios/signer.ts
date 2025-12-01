@@ -12,12 +12,11 @@ import { Keypair } from '@solana/web3.js';
  * @returns A signer instance for signing payments
  */
 
-export function createSigner(network: string, privateKey: Hex, options?: { rpcUrl?: string }): ISigner {
+export function createSigner(network: string, privateKey: Hex): ISigner {
     const chain = getChainConfig(network);
-    chain.rpcUrl = options?.rpcUrl || chain.rpcUrl;
     if (chain.isEvm) {
         const account = privateKeyToAccount(privateKey);
-        return new EvmSigner(account, chain.rpcUrl, chain.id, chain.currency, chain.blockExplorerUrl || '', chain.blockExplorerTxUrl || '');
+        return new EvmSigner(account, chain.rpcUrl, chain.name);
     } else {
         const secretKey = typeof privateKey === 'string'
             ? Uint8Array.from(JSON.parse(privateKey))

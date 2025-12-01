@@ -81,6 +81,8 @@ export async function verifyPayment(
     }
 
     try {
+        // paymentRequirements is a list of PaymentRequirement,decodePayment include paymentRequirement
+        //paymentRequirements is server side config, decodedPayment is client side payment
         const selectedPaymentRequirement =
             findMatchingPaymentRequirements(paymentRequirements, decodedPayment) ||
             paymentRequirements[0];

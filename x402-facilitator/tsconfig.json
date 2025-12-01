@@ -5,6 +5,7 @@
     "declaration": true,
     "declarationMap": true,
     "removeComments": false,
+    "resolveJsonModule": true,
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,

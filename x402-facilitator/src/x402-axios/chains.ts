@@ -1,6 +1,7 @@
 
 type Chain = {
     id: number
+    name: string
     rpcUrl: string
     isEvm: boolean
     currency: string
@@ -8,11 +9,12 @@ type Chain = {
     blockExplorerTxUrl?: string
 }
 
-export function getChain(network: string): Chain {
+export function getChainConfig(network: string): Chain {
     switch (network) {
         case 'rei':
             return {
                 id: 84532,
+                name: 'Rei',
                 rpcUrl: 'https://rpc.ankr.com/eth_goerli',
                 isEvm: true,
                 currency: 'rei',
@@ -22,6 +24,7 @@ export function getChain(network: string): Chain {
         case 'bsc':
             return {
                 id: 56,
+                name: 'BSC',
                 rpcUrl: 'https://rpc.ankr.com/bsc',
                 isEvm: true,
                 currency: 'BNB',
@@ -31,6 +34,7 @@ export function getChain(network: string): Chain {
         case 'bsc-nsepolia':
             return {
                 id: 97,
+                name: 'BSC Testnet',
                 rpcUrl: 'https://rpc.ankr.com/bsc_testnet_chapel',
                 isEvm: true,
                 currency: 'tBNB',
@@ -40,6 +44,7 @@ export function getChain(network: string): Chain {
         case 'solana':
             return {
                 id: 101,
+                name: 'Solana',
                 rpcUrl: 'https://rpc.ankr.com/solana',
                 isEvm: false,
                 currency: 'SOL',

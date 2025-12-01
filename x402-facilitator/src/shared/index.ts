@@ -1,4 +1,5 @@
 import { Network } from '../config/config'
+import { PaymentPayload, PaymentRequirement } from '../types/PaymentRequired'
 import { Address, Hex } from '../types/hex'
 export * from './processPriceToAtomicAmount'
 
@@ -38,4 +39,14 @@ export function decodeXPaymentResponse(header: string): {
         network: network as Network,
         payer: payer as Address,
     }
+}
+
+export function selectPaymentRequirement(
+    requirements: PaymentRequirement[],
+    decodedPayment: PaymentPayload
+): PaymentRequirement {
+    return requirements.find(r =>
+        (!decodedPayment.network || r.network === decodedPayment.network || (Array.isArray(r.network) && r.network.includes(decodedPayment.network))) &&
+        (!decodedPayment.scheme || r.scheme === decodedPayment.scheme)
+    )!
 }
